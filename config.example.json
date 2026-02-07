@@ -1,0 +1,11 @@
+{
+    "client": {
+        "user_id": "@username:beeper.com"
+    },
+    "rooms": [
+        {
+            "room_id": "!chat:beeper.local",
+            "name": "personal chat"
+        }
+    ]
+}

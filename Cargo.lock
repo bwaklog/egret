@@ -757,6 +757,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "egret"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "dotenvy",
+ "matrix-sdk",
+ "reqwest 0.13.1",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2780,21 +2795,6 @@ checksum = "72f81bee8c8ef9b577d1681a70ebbc962c232461e397b22c208c43c04b67a155"
 dependencies = [
  "rmp",
  "serde",
-]
-
-[[package]]
-name = "rot"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "dotenvy",
- "matrix-sdk",
- "reqwest 0.13.1",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]
