@@ -1,2 +1,4 @@
 /target
 .env
+config.json
+sqlite_store/
