@@ -1,6 +1,7 @@
 {
   "client": {
     "user_id": "@username:beeper.com",
+    "sqlite_store": "path_to_sqlite_db",
     "sessions_file": "sessions.json"
   },
   "rooms": [
