@@ -2,3 +2,4 @@
 .env
 config.json
 sqlite_store/
+session.json

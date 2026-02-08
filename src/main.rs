@@ -2,6 +2,7 @@ pub mod client;
 pub mod config;
 
 use crate::client::MatrixClient;
+use matrix_sdk::ruma::events::room::message::SyncRoomMessageEvent;
 use tracing::info;
 use tracing_subscriber::{EnvFilter, FmtSubscriber, fmt::time};
 
@@ -19,14 +20,38 @@ async fn main() -> anyhow::Result<()> {
 
     tracing::subscriber::set_global_default(subscriber)?;
 
-    let config = config::RotConfig::load_config(None)?;
+    let config = config::EgretConfig::load_config(None)?;
     config.source_env()?;
 
     info!("{:#?}", &config);
-    let client = MatrixClient::init(config.client).await?;
-    client.login_and_sync().await?;
+    let matrix_client = MatrixClient::init(config.client).await?;
+    matrix_client.login().await?;
 
     // info!("Adding event handler for room messages");
+
+    config.rooms.iter().for_each(|room| {
+        let room = room.clone();
+        matrix_client.client.add_room_event_handler(
+            room.room_id.as_str().try_into().unwrap(),
+            |ev: SyncRoomMessageEvent| async move {
+                info!("{:#?}", ev);
+                // if let SyncRoomMessageEvent::Original(OriginalSyncRoomMessageEvent {
+                //     content,
+                //     sender,
+                //     ..
+                // }) = ev
+                // {
+                //     if let MessageType::Text(content) = content.msgtype {
+                //         info!(
+                //             "sender" = sender.as_str(),
+                //             "room name" = room.name,
+                //             "message" = content.body
+                //         );
+                //     }
+                // }
+            },
+        );
+    });
 
     // let room_id = config
     //     .rooms
@@ -70,7 +95,7 @@ async fn main() -> anyhow::Result<()> {
     //     println!("name={:?}", room.display_name().await.ok());
     // }
 
-    // let _ = tokio::signal::ctrl_c().await;
+    let _ = tokio::signal::ctrl_c().await;
 
     Ok(())
 }

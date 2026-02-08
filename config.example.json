@@ -1,11 +1,12 @@
 {
-    "client": {
-        "user_id": "@username:beeper.com"
-    },
-    "rooms": [
-        {
-            "room_id": "!chat:beeper.local",
-            "name": "personal chat"
-        }
-    ]
+  "client": {
+    "user_id": "@username:beeper.com",
+    "sessions_file": "sessions.json"
+  },
+  "rooms": [
+    {
+      "room_id": "!chat:beeper.local",
+      "name": "personal chat"
+    }
+  ]
 }

@@ -1,6 +1,10 @@
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, io::BufReader, path::Path};
+use std::{
+    collections::HashSet,
+    io::BufReader,
+    path::{Path, PathBuf},
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RoomConfig {
@@ -12,11 +16,12 @@ pub struct RoomConfig {
 pub struct MatrixClientConfig {
     pub user_id: String,
     #[serde(default = "default_sqlite_store")]
-    pub sqlite_store: String
+    pub sqlite_store: String,
+    pub sessions_file: PathBuf,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RotConfig {
+pub struct EgretConfig {
     pub rooms: Vec<RoomConfig>,
     pub client: MatrixClientConfig,
 
@@ -33,7 +38,7 @@ fn default_sqlite_store() -> String {
     "./sqlite_store".to_string()
 }
 
-impl RotConfig {
+impl EgretConfig {
     pub fn load_config(path: Option<String>) -> anyhow::Result<Self> {
         let mut config_file = std::fs::OpenOptions::new()
             .read(true)
@@ -62,6 +67,8 @@ impl RotConfig {
             "MATRIX_USER_ID".to_string(),
             "MATRIX_PASSWORD".to_string(),
             "BEEPER_RECOVERY_CODE".to_string(),
+            "TURSO_DB_URL".to_string(),
+            "TURSO_AUTH_TOKEN".to_string(),
         ]);
         let got: HashSet<String> = std::env::vars().map(|(k, _)| k).collect();
 
