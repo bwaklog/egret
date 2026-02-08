@@ -2,7 +2,11 @@ pub mod client;
 pub mod config;
 
 use crate::client::MatrixClient;
-use matrix_sdk::ruma::events::room::message::SyncRoomMessageEvent;
+use anyhow::anyhow;
+use matrix_sdk::ruma::events::{
+    OriginalSyncMessageLikeEvent,
+    room::message::{MessageType, RoomMessageEventContent, SyncRoomMessageEvent},
+};
 use tracing::info;
 use tracing_subscriber::{EnvFilter, FmtSubscriber, fmt::time};
 
@@ -22,78 +26,63 @@ async fn main() -> anyhow::Result<()> {
 
     let config = config::EgretConfig::load_config(None)?;
     config.source_env()?;
+    info!("sourced config and env variables");
 
-    info!("{:#?}", &config);
     let matrix_client = MatrixClient::init(config.client).await?;
     matrix_client.login().await?;
 
     // info!("Adding event handler for room messages");
 
     config.rooms.iter().for_each(|room| {
-        let room = room.clone();
+        let room_config = room.clone();
+        let innser_clinet = matrix_client.client.clone();
+        let inner_room_config = room_config.clone();
         matrix_client.client.add_room_event_handler(
-            room.room_id.as_str().try_into().unwrap(),
+            room_config.room_id.as_str().try_into().unwrap(),
             |ev: SyncRoomMessageEvent| async move {
-                info!("{:#?}", ev);
-                // if let SyncRoomMessageEvent::Original(OriginalSyncRoomMessageEvent {
-                //     content,
-                //     sender,
-                //     ..
-                // }) = ev
-                // {
-                //     if let MessageType::Text(content) = content.msgtype {
-                //         info!(
-                //             "sender" = sender.as_str(),
-                //             "room name" = room.name,
-                //             "message" = content.body
-                //         );
-                //     }
-                // }
+                if let SyncRoomMessageEvent::Original(OriginalSyncMessageLikeEvent {
+                    content,
+                    sender,
+                    event_id,
+                    ..
+                }) = ev
+                {
+                    if let MessageType::Text(content) = content.msgtype {
+                        info!(
+                            "sender" = sender.as_str(),
+                            "room name" = room_config.name,
+                            "message" = content.body
+                        );
+                        if content.body.starts_with("@egret") {
+                            info!(
+                                "event_id" = event_id.as_str(),
+                                "sender" = sender.to_string(),
+                                "is a bot command"
+                            );
+                            let room = innser_clinet
+                                .get_room(inner_room_config.room_id.as_str().try_into().unwrap())
+                                .ok_or(anyhow!(
+                                    "failed to get a room with id {}",
+                                    inner_room_config.room_id
+                                ))
+                                .unwrap();
+                            info!(
+                                "room is encrypted: {}",
+                                room.encryption_state().is_encrypted()
+                            );
+
+                            let msg = RoomMessageEventContent::text_plain("[bot] pong");
+                            let response = room.send(msg).await.unwrap();
+                            info!(
+                                "response event id" = response.event_id.as_str(),
+                                "response sent"
+                            );
+                        }
+                    }
+                }
             },
         );
     });
-
-    // let room_id = config
-    //     .rooms
-    //     .iter()
-    //     .nth(0)
-    //     .unwrap()
-    //     .room_id
-    //     .as_str()
-    //     .try_into()?;
-    // client
-    //     .client
-    //     .add_room_event_handler(room_id, |_: SyncRoomMessageEvent| async move {
-    //         info!("got a message");
-    //     });
-
-    // client.add_room_event_handler(room_id, |ev: SyncRoomMessageEvent| async move {
-    //     if let SyncRoomMessageEvent::Original(OriginalSyncRoomMessageEvent {
-    //         content,
-    //         sender,
-    //         ..
-    //     }) = ev
-    //     {
-    //         // println!("received message: {content:#?} from sender {sender}",);
-    //         if let MessageType::Text(content) = content.msgtype {
-    //             println!("message from {sender}: {}", content.body);
-    //         }
-    //     }
-    // });
-    // println!("added event handler for room {room_id}");
-
-    // // get room information
-    // let room = client
-    //     .get_room(room_id)
-    //     .expect("failed to get room for room_id");
-    // println!("room name: {:?}", room.display_name().await.ok());
-
-    // let rooms = client.client.joined_rooms();
-    // println!("number of joined rooms: {}", rooms.len());
-    // for room in rooms {
-    //     println!("room_id={}", room.room_id());
-    //     println!("name={:?}", room.display_name().await.ok());
-    // }
 
     let _ = tokio::signal::ctrl_c().await;
 

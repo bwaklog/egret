@@ -122,6 +122,15 @@ impl MatrixClient {
                 .restore_session(matrix_session)
                 .await
                 .map_err(|e| anyhow!("Failed to restore session: {e}"))?;
+
+            self.client
+                .encryption()
+                .recovery()
+                .recover(&self.recovery_code)
+                .await?;
+
+            info!("Encryption recovery successful for {}", self.user_id);
+
             self.spawn_sync_task().await?;
             Ok(())
         } else {
