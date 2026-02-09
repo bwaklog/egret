@@ -15,9 +15,15 @@ pub struct RoomConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MatrixClientConfig {
     pub user_id: String,
+    /// Session file for recovery and holding auth and refresh tokens
+    pub sessions_file: PathBuf,
+
+    /// Path for matrix client sqlite store
     #[serde(default = "default_sqlite_store")]
     pub sqlite_store: String,
-    pub sessions_file: PathBuf,
+    /// path to image store and media
+    #[serde(default = "default_image_store")]
+    pub image_store: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -36,6 +42,10 @@ fn default_env_file() -> String {
 
 fn default_sqlite_store() -> String {
     "./sqlite_store".to_string()
+}
+
+fn default_image_store() -> String {
+    "./tmp".to_string()
 }
 
 impl EgretConfig {

@@ -5,6 +5,8 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.100"
+base64 = "0.22.1"
+chrono = "0.4.43"
 dotenvy = "0.15.7"
 matrix-sdk = { version = "0.16.0", features = ["e2e-encryption", "sqlite"] }
 reqwest = "0.13.1"

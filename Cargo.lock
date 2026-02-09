@@ -761,6 +761,8 @@ name = "egret"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "base64",
+ "chrono",
  "dotenvy",
  "matrix-sdk",
  "reqwest 0.13.1",

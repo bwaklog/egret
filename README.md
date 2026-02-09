@@ -7,6 +7,7 @@
   - `client.user_id`: Your matrix user ID, e.g. `@username:beeper.com`
   - `client.sqlite_store` (optional): Local sqlite store for storing matrix client data
   - `client.sessions_file`: For session persistence (refresh and access tokens)
+  - `client.image_store`: Path where media files will be stored (default is `./tmp`)
   - `rooms`: List of rooms to join, each with `room_id` and `name`
   
   An example is shown below
@@ -16,7 +17,8 @@
     "client": {
       "user_id": "@username:beeper.com",
       "sqlite_store": "path_to_sqlite_db",
-      "sessions_file": "sessions.json"
+      "sessions_file": "sessions.json",
+      "image_store": "path to media dir : default tmp"
     },
     "rooms": [
       {
